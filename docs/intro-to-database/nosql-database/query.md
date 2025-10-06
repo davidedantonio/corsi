@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Interrogare MongoDB
+# Interrogare le collection
 
 Ora che abbiamo inserito molti documenti nel nostro database, è il momento di **interrogare** il database
 per ottenere informazioni. Esistono vari motivi e metodi per interrogare un database. Potresti interrogare un database
