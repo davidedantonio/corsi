@@ -2,7 +2,7 @@
 sidebar_position: 6
 ---
 
-# Aggregazione in MongoDB
+# Aggregazione
 
 MongoDB ha una funzionalità divertente chiamata aggregazione. Ci sono due modi per farlo, pipeline di aggregazione e map-reduce.
 Map-reduce è esattamente quello che ti aspetteresti se vieni da un background di programmazione funzionale: fornisci a MongoDB una
