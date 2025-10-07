@@ -105,7 +105,7 @@ const config: Config = {
             },
             {
               label: "Data Analytics & Business Intelligence",
-              to: "/docs/category/data-analytics-business-intelligence",
+              to: "docs/category/data-analytics--bi",
             },
             {
               label: "Data Analytics & AI",
