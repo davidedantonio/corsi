@@ -12,17 +12,22 @@ function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
   return (
     <header className={clsx("hero", styles.heroBanner)}>
-      <div className="container">
+      <div className="container centered">
+        <img src="/img/logo.png" width="400" className={styles.heroLogo} />
         <Heading as="h1" className="hero__title">
           {siteConfig.title}
         </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <p className="hero__subtitle">
+          Tre corsi pensati per accompagnarti nel futuro dei dati —
+          dall’archiviazione intelligente alle analisi strategiche, fino alla
+          creazione di soluzioni AI con agenti e sistemi avanzati.
+          <br />
+          Un percorso innovativo realizzato in partnership tra{" "}
+          <strong>FINANZA.TECH</strong> e <strong>MCG Consulting</strong>.
+        </p>
         <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/intro"
-          >
-            Docusaurus Tutorial - 5min ⏱️
+          <Link className="button button--primary button--lg" to="/docs/intro">
+            Iniziamo
           </Link>
         </div>
       </div>

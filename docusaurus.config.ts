@@ -5,8 +5,9 @@ import type * as Preset from "@docusaurus/preset-classic";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: "My Site",
-  tagline: "Dinosaurs are cool",
+  title: "Introduzione ai Database, Data Analytics e AI",
+  tagline:
+    "Corso realizzato in partnership tra FINANZA.TECH e FCG Consulting per scoprire come dati, analisi e intelligenza artificiale guidano il business moderno.",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -73,10 +74,10 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: "Davide D'Antonio",
+      title: "",
       logo: {
         alt: "My Site Logo",
-        src: "img/logo.svg",
+        src: "img/logo.png",
       },
       items: [
         {
@@ -86,7 +87,7 @@ const config: Config = {
           label: "Corsi",
         },
         {
-          href: "https://github.com/facebook/docusaurus",
+          href: "https://github.com/davidedantonio/corsi",
           label: "GitHub",
           position: "right",
         },
@@ -99,25 +100,37 @@ const config: Config = {
           title: "Corsi",
           items: [
             {
-              label: "Corsi",
-              to: "/docs/intro",
+              label: "Introduzione ai Database",
+              to: "/docs/category/introduzione-ai-database",
+            },
+            {
+              label: "Data Analytics & Business Intelligence",
+              to: "/docs/category/data-analytics-business-intelligence",
+            },
+            {
+              label: "Data Analytics & AI",
+              to: "/docs/category/data-analytics-artificial-intelligence",
             },
           ],
         },
         {
-          title: "Community",
+          title: "Contatti",
           items: [
             {
-              label: "Stack Overflow",
-              href: "https://stackoverflow.com/questions/tagged/docusaurus",
+              label: "LinkedIn",
+              href: "https://www.linkedin.com/in/davidedantonio/",
             },
             {
-              label: "Discord",
-              href: "https://discordapp.com/invite/docusaurus",
+              label: "Instagram",
+              href: "https://www.instagram.com/davidedantonio/",
             },
             {
-              label: "X",
-              href: "https://x.com/docusaurus",
+              label: "Medium",
+              href: "https://medium.com/@davide-dantonio",
+            },
+            {
+              label: "Facebook",
+              href: "https://www.facebook.com/davide.dantonio84",
             },
           ],
         },
@@ -130,12 +143,12 @@ const config: Config = {
             },
             {
               label: "GitHub",
-              href: "https://github.com/facebook/docusaurus",
+              href: "https://github.com/davidedantonio/corsi",
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Crafted with ❤️ by Davide D'Antonio.`,
     },
     prism: {
       theme: prismThemes.github,
