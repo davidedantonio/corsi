@@ -39,13 +39,13 @@ Altri, come **MongoDB**, ti permettono di definire la struttura “al volo”.
 
 ## Tipi di database
 
-Oggi esistono molti tipi di database. Noi ne tratteremo quattro, ma è utile sapere che ne esistono altri.
+Oggi esistono molti tipi di database. Noi ne tratteremo tre, ma è utile sapere che ne esistono altri.
 
 Nel corso parleremo di:
 
 - **Database relazionali (RDBMS, SQL)**
 - **Database documentali (NoSQL)**
-- **Database chiave-valore**
+- **Database semantici**
 
 ---
 
@@ -60,7 +60,7 @@ ACID è un acronimo che sta per **Atomicita, Consistenza, Isolamento, Durabilita
 - **Isolamento** → l’esecuzione concorrente di query deve dare lo stesso risultato di un’esecuzione sequenziale.
 - **Durabilità** → i dati devono sopravvivere a crash o riavvii; ciò spesso richiede scrittura su disco (più lenta ma sicura).
 
-⚖️ Non tutto deve essere sempre **ACID**: è sicuro ma può essere lento. Molti database permettono di scegliere per singola query quanto “ACID” deve essere l’operazione, bilanciando sicurezza e performance.
+Non tutto deve essere sempre **ACID**: è sicuro ma può essere lento. Molti database permettono di scegliere per singola query quanto “ACID” deve essere l’operazione, bilanciando sicurezza e performance.
 
 ---
 
