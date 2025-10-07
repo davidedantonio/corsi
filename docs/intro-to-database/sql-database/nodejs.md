@@ -13,8 +13,8 @@ Creiamo velocemente un piccolo progetto Node.js per aiutarti a trasferire le tue
 Crea una nuova cartella e inizializza un progetto Node.js:
 
 ```bash
-mkdir intro-to-databases
-cd intro-to-databases
+mkdir nodejs-ps
+cd nodejs-ps
 npm init -y
 
 npm install --save pg fastify @fastify/static

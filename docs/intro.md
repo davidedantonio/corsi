@@ -26,12 +26,12 @@ partecipare a conferenze tecnologiche per rimanere aggiornato sulle ultime tende
 
 ![Family](/img/family.jpg)
 
-Quando non sono al lavoro per FINANZA.TECH o MCG Consulting, mi piace passare il tempo con la mia famiglia,
-i miei due figli Vincenzo e Sofia, e mia moglie Milena. Mi piacciono i videogiochi vintage, la musica e
+Quando non sono al lavoro per FINANZA.TECH o MCG Consulting, sono un papà ed un marito. Ho
+due figli, Sofia e Vincenzo, e mia moglie si chiama Milena. Mi piacciono i videogiochi vintage, la musica e
 la pallacanestro.
 
 ## Un grazie speciale a MCG Consulting
 
-Un grazie speciale a MCG Consulting in modo esplicito per aver reso possibile questo corso.
+Un grazie speciale a MCG Consulting in modo esplicito per la fiducia che ha riposto in me negli ultimi due anni.
 
 ![MCG](/img/mcg.png)
