@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Installazione
 
-In questo corso useremo quattro database diversi: MongoDB, PostgreSQL e Redis.
+In questo corso useremo quattro database diversi: MongoDB, PostgreSQL e Qdrant.
 Questi sono pacchetti software che dovrai scaricare e avviare, e hai diverse opzioni per farlo.
 Tutti funzionano su macOS, Windows e Linux. Io spiegherò in modo dettagliato come farlo su macOS e Windows, e presumo che tutti
 gli amici che usano Linux possano adattare le istruzioni per macOS alle loro esigenze.
@@ -15,7 +15,7 @@ Ecco le versioni che utilizzeremo in questo corso:
 
 - MongoDB v8.2.1
 - PostgreSQL v17.0
-- Redis v8.2
+- Qdrant v1.15.5
 
 Ecco alcune delle opzioni che hai a disposizione:
 
@@ -47,7 +47,7 @@ Qui trovi tutti gli URL corretti.
 
 - [MongoDB](https://www.mongodb.com/try/download/community)
 - [PostgreSQL](https://www.postgresql.org/download/)
-- [Redis](https://redis.io/downloads/)
+- [Qdrant](https://qdrant.tech/documentation/quickstart/)
 
 Assicurati di scaricare la stessa versione che indico io, altrimenti potresti avere problemi (probabilmente non sarà la versione più recente).
 

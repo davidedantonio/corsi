@@ -43,24 +43,25 @@ Oggi esistono molti tipi di database. Noi ne tratteremo tre, ma è utile sapere 
 
 Nel corso parleremo di:
 
-- **Database relazionali (RDBMS, SQL)**
-- **Database documentali (NoSQL)**
-- **Database semantici**
+- **Database relazionali (PostgreSQL, MySQL)**
+- **Database documentali (MongoDB)**
+- **Database semantici (Qdrant)**
 
 ---
 
 ## ACID
 
-ACID è un acronimo che sta per **Atomicita, Consistenza, Isolamento, Durabilita**. Sono quattro proprietà fondamentali per valutare come un database gestisce le transazioni.
+ACID è un acronimo che sta per **Atomicita, Consistenza, Isolamento, Durabilita**. Sono quattro proprietà fondamentali per valutare
+come un database gestisce le transazioni.
 
-- **Atomicità** → un’operazione deve avvenire tutta insieme o non avvenire affatto.
 - **Atomicità** → un’operazione deve avvenire tutta insieme o non avvenire affatto.
   > Es.: trasferimento bancario: togli soldi da un conto e aggiungili all’altro; non può fallire a metà.
 - **Consistenza** → dopo un’operazione i dati devono rimanere coerenti tra più server/repliche.
 - **Isolamento** → l’esecuzione concorrente di query deve dare lo stesso risultato di un’esecuzione sequenziale.
 - **Durabilità** → i dati devono sopravvivere a crash o riavvii; ciò spesso richiede scrittura su disco (più lenta ma sicura).
 
-Non tutto deve essere sempre **ACID**: è sicuro ma può essere lento. Molti database permettono di scegliere per singola query quanto “ACID” deve essere l’operazione, bilanciando sicurezza e performance.
+Non tutto deve essere sempre **ACID**: è sicuro ma può essere lento. Molti database permettono di scegliere per singola query quanto “ACID” deve
+essere l’operazione, bilanciando sicurezza e performance.
 
 ---
 

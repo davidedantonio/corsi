@@ -93,7 +93,7 @@ Ogni punto ha:
 
 ## Usare Qdrant con Node.js
 
-A di MongoDB, PostgreSQL e Redis, Qdrant offre un'API REST semplice da usare.
+A differenza di MongoDB e PostgreSQL, Qdrant offre un'API REST semplice da usare.
 Di conseguenza, possiamo usare `fetch` o `axios` per interagire con Qdrant, quindi
 abbiamo la necessità di installare un client specifico. Ovviamente, utilizzeremo quello
 per Node.js. Sentiti libero/a di usare `axios` se preferisci, o un altro linguaggio di

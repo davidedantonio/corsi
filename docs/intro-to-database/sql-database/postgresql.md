@@ -13,9 +13,12 @@ Io userò la versione **17.0** (l’ultima immagine disponibile al momento) e ti
 Anche se potrebbero esserci versioni più recenti, questa è quella compatibile con gli esempi.
 
 ```bash
-docker run --name corso-postgres -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d --rm postgres:17.0
-
-docker exec -it -u postgres corso-postgres psql
+docker run -d \
+  --name corso-postgres \
+  -e POSTGRES_PASSWORD=mysecretpassword \
+  -p 5432:5432 \
+  -v corso_pgdata:/var/lib/postgresql/data \
+  postgres:17.0
 ```
 
 Dobbiamo impostare una password, altrimenti PostgreSQL non si avvierà di default.  
@@ -154,4 +157,4 @@ SELECT * FROM users;
 Dovresti vedere la riga che hai appena creato!  
 Ottimo lavoro — sei pronto per continuare ad approfondire SQL nella prossima sezione.
 
-[types]: https://www.postgresql.org/docs/9.5/datatype.html#DATATYPE-TABLE
+[types]: https://www.postgresql.org/docs/18/datatype.html#DATATYPE-TABLE
