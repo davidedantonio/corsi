@@ -119,4 +119,4 @@ Per cancellare un record:
 DELETE FROM users WHERE user_id = 1000;
 ```
 
-[sql]: https://btholt.github.io/complete-intro-to-databases/sample-postgresql.sql
+[sql]: https://raw.githubusercontent.com/davidedantonio/corsi/refs/heads/main/sample-postgres.sql
