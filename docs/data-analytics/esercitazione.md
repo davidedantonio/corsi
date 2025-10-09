@@ -8,7 +8,7 @@ L’obiettivo è **importare dati CSV in PostgreSQL** (usando **Node.js** oppure
 
 ## Installazione di PostgreSQL e Grafana
 
-All'interno del progetto trovate un file `docker-compose.yml` che vi permette di avviare facilmente sia PostgreSQL che Grafana utilizzando Docker.
+All'interno del [progetto](https://github.com/davidedantonio/data-analytics-exercise) trovate un file `docker-compose.yml` che vi permette di avviare facilmente sia PostgreSQL che Grafana utilizzando Docker.
 Assicuratevi di avere Docker e Docker Compose installati sul vostro sistema.
 
 Per avviare i servizi, eseguite il seguente comando nella directory del progetto:
