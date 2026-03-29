@@ -26,7 +26,7 @@ partecipare a conferenze tecnologiche per rimanere aggiornato sulle ultime tende
 
 ![Family](/img/family.jpg)
 
-Quando non sono al lavoro per FINANZA.TECH o MCG Consulting, sono un papà ed un marito. Ho
+Quando non sono al lavoro per FINANZA.TECH o insegno, sono un papà ed un marito. Ho
 due figli, Sofia e Vincenzo, e mia moglie si chiama Milena. Mi piacciono i videogiochi vintage, la musica e
 la pallacanestro.
 
