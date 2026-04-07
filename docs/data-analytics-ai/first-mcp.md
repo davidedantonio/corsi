@@ -99,3 +99,27 @@ A questo punto, prova ad avviare il server: vedrai che apparentemente non succed
 Questo perché devi utilizzare lo stdin per inviargli dei comandi.
 
 Proviamo a farne uno.
+
+```
+# List available tools:
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {"name": "add", "arguments": {}}}' | node mcp.js | jq
+
+# Call a tool:
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "add", "arguments": {"a": 5, "b": 3}}}' | node mcp.js
+```
+
+Ecco la traduzione in italiano, naturale e adatta a un contesto didattico:
+
+⸻
+
+- `jq` è uno strumento estremamente utile per processare JSON da riga di comando. Può fare molto più che formattare l’output, ma nel 99,99%
+  dei casi lo utilizzo proprio per quello.
+
+- In realtà non è necessario sapere come invocare manualmente il tuo server MCP tramite CLI: sarà l’LLM a farlo per te. Tuttavia, può essere
+  molto utile in fase di testing. Personalmente, spesso faccio generare direttamente all’LLM il comando da eseguire da terminale.
+
+- È sufficiente sapere che stai chiamando i tool tramite stdin, utilizzando un formato standard.
+  Il client invia una richiesta per ottenere la lista dei tool disponibili (ed è così che gli LLM capiscono cosa possono utilizzare), e
+  poi utilizza tools/call per invocare effettivamente un tool. C’è molto di più dietro MCP, ma è un livello abbastanza basso e, nella
+  pratica, non è necessario conoscerlo in dettaglio. Questo
+  però è il protocollo di base.
