@@ -168,5 +168,5 @@ Funziona anche **solo escludendo** campi (cioè: includi tutto ciò che **non** 
 db.pets.find({ type: "dog" }, { _id: 0 });
 ```
 
-[operators]:
-[geo]:
+<!-- [operators]: -->
+<!-- [geo]: -->

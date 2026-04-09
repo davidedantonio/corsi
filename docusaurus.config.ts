@@ -28,7 +28,7 @@ const config: Config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: "facebook", // Usually your GitHub org/user name.
-  projectName: "docusaurus", // Usually your repo name.
+  projectName: "mcg-consulting2026", // Usually your repo name.
 
   onBrokenLinks: "throw",
 
@@ -46,8 +46,6 @@ const config: Config = {
       {
         docs: {
           sidebarPath: "./sidebars.ts",
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl:
             "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
         },
@@ -111,10 +109,10 @@ const config: Config = {
               label: "Data Analytics & Business Intelligence",
               to: "docs/category/data-analytics--bi",
             },
-            {
-              label: "Data Analytics & AI",
-              to: "/docs/category/data-analytics-artificial-intelligence",
-            },
+            // {
+            //   label: "Data Analytics & AI",
+            //   to: "/docs/category/data-analytics-artificial-intelligence",
+            // },
           ],
         },
         {
@@ -141,10 +139,6 @@ const config: Config = {
         {
           title: "More",
           items: [
-            {
-              label: "Blog",
-              to: "/blog",
-            },
             {
               label: "GitHub",
               href: "https://github.com/davidedantonio/corsi",
