@@ -4,284 +4,297 @@ sidebar_position: 7
 
 # Integrazione con Node.js
 
-Creiamo velocemente un piccolo progetto Node.js per aiutarti a trasferire le tue competenze dalla riga di comando al mondo della programmazione.
+Fino ad ora abbiamo interrogato PostgreSQL direttamente dalla shell `psql`. In questo esempio vediamo come fare la stessa cosa da **Node.js** — che è poi quello che succede in qualsiasi applicazione reale: il codice si connette al database, esegue le query e usa i risultati.
 
-[Ecco il codice completo su GitHub](https://github.com/davidedantonio/intro-to-databases)
+Per semplicità creeremo un **unico script** da lanciare da terminale che stampa un report del nostro e-commerce. Niente server, niente HTML — solo Node.js e PostgreSQL.
+
+---
 
 ## Setup del progetto
 
 Crea una nuova cartella e inizializza un progetto Node.js:
 
 ```bash
-mkdir nodejs-ps
-cd nodejs-ps
+mkdir ecommerce-report
+cd ecommerce-report
 npm init -y
-
-npm install --save pg fastify @fastify/static
+npm install pg
 ```
 
-Aggiungere uno script di avvio nel `package.json`:
+Aggiungi `"type": "module"` nel `package.json` per usare la sintassi `import/export` moderna:
 
 ```json
-"scripts": {
-  "start": "node index.js"
+{
+  "name": "ecommerce-report",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "pg": "^8.x.x"
+  }
 }
 ```
 
-sotto la voce `depescription` aggiungete questa:
-
-```json
-  "type": "module",
-```
-
-e aggiungete un file `.gitignore`:
+Crea il file `.gitignore`:
 
 ```
 node_modules
 .env
 ```
 
-Ora create i seguenti file:
+Crea il file dello script:
 
 ```bash
-touch index.js
-touch /public/list.html
-touch /public/search_delete.html
+touch report.js
 ```
 
-Terminata la parte di setup, apri il progetto con il tuo editor di codice preferito. Dovresti vedere questa struttura:
+---
 
-```
-intro-to-databases
-├── node_modules
-├── .gitignore
-├── index.js
-├── package-lock.json
-├── package.json
-└── public
-    ├── list.html
-    └── search_delete.html
-```
+## Lo script
 
-Ora copiate e incollate il seguente codice in `/public/list.html`:
-
-```html
-<html>
-  <head>
-    <title>Lista Boards</title>
-  </head>
-  <body>
-    <h1>Lista Boards</h1>
-    <div id="boards-container"></div>
-  </body>
-
-  <script type="text/javascript">
-    fetch("http://localhost:5000/boards")
-      .then((response) => response.json())
-      .then((data) => {
-        const body = document.getElementById("boards-container");
-        body.innerHTML = "";
-        data.forEach((board) => {
-          const boardElement = document.createElement("div");
-          boardElement.innerHTML = `<h2>${board.board_id} - ${board.board_name}</h2><p>${board.board_description}</p>`;
-          body.appendChild(boardElement);
-        });
-      })
-      .catch((error) => console.error("Error fetching boards:", error));
-  </script>
-</html>
-```
-
-E questo in `/public/search_delete.html`:
-
-```html
-<html>
-  <head>
-    <title>Cerca Boards</title>
-  </head>
-  <body>
-    <h1>Cerca Board</h1>
-    <div>
-      <input type="text" id="search-input" placeholder="Cerca per id" />
-      <button id="search-button">Cerca</button>
-      <button id="delete-button">Elimina</button>
-    </div>
-    <div id="boards-container"></div>
-  </body>
-
-  <script type="text/javascript">
-    const searchButton = document.getElementById("search-button");
-    const deleteButton = document.getElementById("delete-button");
-    const searchInput = document.getElementById("search-input");
-    const boardsContainer = document.getElementById("boards-container");
-
-    deleteButton.addEventListener("click", () => {
-      const query = searchInput.value.trim();
-      if (query) {
-        fetch(`http://localhost:5000/boards/${query}`, {
-          method: "DELETE",
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .then((result) => {
-            boardsContainer.innerHTML = `<p>${result.message}</p>`;
-          })
-          .catch((error) => {
-            boardsContainer.innerHTML = `<p>${error.message}</p>`;
-          });
-      } else {
-        boardsContainer.innerHTML =
-          "<p>Per favore, inserisci un id di board valido.</p>";
-      }
-    });
-
-    searchButton.addEventListener("click", () => {
-      const query = searchInput.value.trim();
-      if (query) {
-        fetch(`http://localhost:5000/boards/${query}`)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Board non trovato");
-            }
-            return response.json();
-          })
-          .then((board) => {
-            boardsContainer.innerHTML = `<h2>${board.board_id} - ${board.board_name}</h2><p>${board.board_description}</p>`;
-          })
-          .catch((error) => {
-            boardsContainer.innerHTML = `<p>${error.message}</p>`;
-          });
-      } else {
-        boardsContainer.innerHTML =
-          "<p>Per favore, inserisci un id di board valido.</p>";
-      }
-    });
-  </script>
-</html>
-```
-
-Normalmente non si mettono i file HTML nella cartella `public`, ma per semplicità in questo esempio lo faremo.
-Ora apri il file `index.js` e incolla il seguente codice:
+Apri `report.js` e incolla questo codice:
 
 ```javascript
-import Fastify from "fastify";
-import FastifyStatic from "@fastify/static";
 import pg from "pg";
-import path from "path";
 
-const app = Fastify({ logger: true });
-
-const __dirname = path.resolve();
-
-// PostgreSQL client setup
-const pool = new pg.Pool({
+// --- Connessione al database ---
+const client = new pg.Client({
   user: "postgres",
   host: "localhost",
-  database: "message_boards",
+  database: "ecommerce",
   password: "mysecretpassword",
   port: 5432,
 });
 
-app.register(FastifyStatic, {
-  root: path.join(__dirname, "./public"),
-  prefix: "/public/",
-});
+// Funzione di utilità per stampare separatori
+function separator(title) {
+  console.log("\n" + "=".repeat(50));
+  console.log(" " + title);
+  console.log("=".repeat(50));
+}
 
-app.get("/list", async (request, reply) => {
-  return reply.sendFile("list.html");
-});
+async function runReport() {
+  await client.connect();
 
-app.get("/search", async (request, reply) => {
-  return reply.sendFile("search_delete.html");
-});
-
-app.get("/boards", async (request, reply) => {
-  const client = await pool.connect();
   try {
-    const res = await client.query("SELECT * FROM boards");
-    return res.rows;
+    // -------------------------------------------
+    // 1. Riepilogo generale
+    // -------------------------------------------
+    separator("📦 RIEPILOGO GENERALE");
+
+    const totCustomers = await client.query(
+      "SELECT COUNT(*) AS totale FROM customers"
+    );
+    console.log(`Clienti totali: ${totCustomers.rows[0].totale}`);
+
+    const totOrders = await client.query(`
+      SELECT
+        COUNT(*) AS totale,
+        COUNT(*) FILTER (WHERE status = 'completed')  AS completati,
+        COUNT(*) FILTER (WHERE status = 'pending')    AS in_attesa,
+        COUNT(*) FILTER (WHERE status = 'cancelled')  AS cancellati,
+        COUNT(*) FILTER (WHERE status = 'refunded')   AS rimborsati
+      FROM orders
+    `);
+    const o = totOrders.rows[0];
+    console.log(`Ordini totali:  ${o.totale}`);
+    console.log(`  ✅ Completati:  ${o.completati}`);
+    console.log(`  ⏳ In attesa:   ${o.in_attesa}`);
+    console.log(`  ❌ Cancellati:  ${o.cancellati}`);
+    console.log(`  🔄 Rimborsati:  ${o.rimborsati}`);
+
+    // -------------------------------------------
+    // 2. Fatturato per categoria
+    // -------------------------------------------
+    separator("💰 FATTURATO PER CATEGORIA");
+
+    const revenueByCategory = await client.query(`
+      SELECT
+        c.name AS categoria,
+        SUM(oi.quantity * oi.unit_price) AS fatturato
+      FROM order_items oi
+      JOIN orders o     ON oi.order_id = o.order_id
+      JOIN products p   ON oi.product_id = p.product_id
+      JOIN categories c ON p.category_id = c.category_id
+      WHERE o.status = 'completed'
+      GROUP BY c.name
+      ORDER BY fatturato DESC
+    `);
+
+    revenueByCategory.rows.forEach((row, i) => {
+      const fatturato = parseFloat(row.fatturato).toLocaleString("it-IT", {
+        style: "currency",
+        currency: "EUR",
+      });
+      console.log(`  ${i + 1}. ${row.categoria.padEnd(20)} ${fatturato}`);
+    });
+
+    // -------------------------------------------
+    // 3. Top 5 clienti per spesa
+    // -------------------------------------------
+    separator("🏆 TOP 5 CLIENTI PER SPESA");
+
+    const topCustomers = await client.query(`
+      SELECT
+        cu.full_name,
+        cu.city,
+        cu.segment,
+        COUNT(DISTINCT o.order_id)        AS num_ordini,
+        SUM(oi.quantity * oi.unit_price)  AS totale_speso
+      FROM customers cu
+      JOIN orders o       ON cu.customer_id = o.customer_id
+      JOIN order_items oi ON o.order_id = oi.order_id
+      WHERE o.status = 'completed'
+      GROUP BY cu.customer_id, cu.full_name, cu.city, cu.segment
+      ORDER BY totale_speso DESC
+      LIMIT 5
+    `);
+
+    topCustomers.rows.forEach((row, i) => {
+      const spesa = parseFloat(row.totale_speso).toLocaleString("it-IT", {
+        style: "currency",
+        currency: "EUR",
+      });
+      console.log(
+        `  ${i + 1}. ${row.full_name.padEnd(25)} ` +
+        `${row.city.padEnd(15)} [${row.segment}]  ` +
+        `${row.num_ordini} ordini  ${spesa}`
+      );
+    });
+
+    // -------------------------------------------
+    // 4. Fatturato mensile (ultimo anno)
+    // -------------------------------------------
+    separator("📅 FATTURATO MENSILE 2024");
+
+    const monthlyRevenue = await client.query(`
+      SELECT
+        DATE_TRUNC('month', o.created_on) AS mese,
+        COUNT(DISTINCT o.order_id)        AS num_ordini,
+        SUM(oi.quantity * oi.unit_price)  AS fatturato
+      FROM orders o
+      JOIN order_items oi ON o.order_id = oi.order_id
+      WHERE o.status = 'completed'
+        AND o.created_on >= '2024-01-01'
+        AND o.created_on <  '2025-01-01'
+      GROUP BY mese
+      ORDER BY mese
+    `);
+
+    monthlyRevenue.rows.forEach((row) => {
+      const mese = new Date(row.mese).toLocaleString("it-IT", {
+        month: "long",
+        year: "numeric",
+      });
+      const fatturato = parseFloat(row.fatturato).toLocaleString("it-IT", {
+        style: "currency",
+        currency: "EUR",
+      });
+      console.log(
+        `  ${mese.padEnd(20)} ${String(row.num_ordini).padStart(4)} ordini   ${fatturato}`
+      );
+    });
+
   } catch (err) {
-    app.log.error(err);
-    reply.status(500).send("Internal Server Error");
+    console.error("Errore durante l'esecuzione del report:", err.message);
   } finally {
-    client.release();
+    // Chiudiamo sempre la connessione, anche in caso di errore
+    await client.end();
   }
-});
+}
 
-app.get("/boards/:id", async (request, reply) => {
-  const client = await pool.connect();
-  const { id } = request.params;
-  try {
-    const res = await client.query("SELECT * FROM boards WHERE board_id = $1", [
-      id,
-    ]);
-    if (res.rows.length === 0) {
-      reply.status(404).send("Board not found");
-    }
-    return res.rows[0];
-  } catch (err) {
-    app.log.error(err);
-    reply.status(500).send("Internal Server Error");
-  } finally {
-    client.release();
-  }
-});
-
-app.delete("/boards/:id", async (request, reply) => {
-  const client = await pool.connect();
-  const { id } = request.params;
-  try {
-    const res = await client.query("DELETE FROM boards WHERE board_id = $1", [
-      id,
-    ]);
-
-    if (res.rowCount === 0) {
-      reply.status(404).send({ message: "Board not found" });
-    } else {
-      reply.status(200).send({ message: "Board deleted successfully" });
-    }
-  } catch (err) {
-    app.log.error(err);
-    reply.status(500).send({ message: "Internal Server Error" });
-  } finally {
-    client.release();
-  }
-});
-
-app.listen({ port: 5000 }, (err, address) => {
-  if (err) {
-    app.log.error(err);
-    process.exit(1);
-  }
-  app.log.info(`Server listening at ${address}`);
-});
+runReport();
 ```
 
-Ora puoi avviare il server:
+Lancia lo script:
 
 ```bash
-npm start
+node report.js
 ```
 
-Apri il browser e vai su [http://localhost:5000/list](http://localhost:5000/list) per vedere la lista delle boards.
-Vai su [http://localhost:5000/search](http://localhost:5000/search) per cercare o eliminare una board per ID.
+Dovresti vedere qualcosa di simile:
+
+```
+==================================================
+ 📦 RIEPILOGO GENERALE
+==================================================
+Clienti totali: 500
+Ordini totali:  10000
+  ✅ Completati:  7508
+  ⏳ In attesa:   1012
+  ❌ Cancellati:  993
+  🔄 Rimborsati:  487
+
+==================================================
+ 💰 FATTURATO PER CATEGORIA
+==================================================
+  1. Elettronica          € 312.450,00
+  2. Casa e Cucina        €  98.230,50
+  ...
+```
+
+---
 
 ## Spiegazione del codice
 
-Il codice sopra crea un semplice server web usando Fastify e si connette a un database PostgreSQL usando il modulo `pg`.
-Ecco una spiegazione delle parti principali:
+### Connessione con `pg.Client`
 
-1. **Connessione a PostgreSQL**: Usiamo un pool di connessioni per gestire le connessioni al database in modo efficiente.
-2. **Rotte API**:
-   - `GET /boards`: Recupera tutte le boards dal database.
-   - `GET /boards/:id`: Recupera una board specifica per ID.
-   - `DELETE /boards/:id`: Elimina una board specifica per ID.
-3. **Gestione degli errori**: Ogni rotta gestisce gli errori
-   e restituisce un messaggio di errore appropriato se qualcosa va storto.
-4. **Servizio di file statici**: Usiamo `@fastify/static` per servire i file HTML dalla cartella `public`.
-5. **Interfaccia utente**: I file HTML contengono JavaScript che fa richieste alle API per mostrare i dati e gestire le azioni dell'utente.
-6. **Avvio del server**: Il server ascolta sulla porta 5000 e logga l'indirizzo di ascolto.
+```javascript
+const client = new pg.Client({ ... });
+await client.connect();
+```
 
-Ora hai un semplice progetto Node.js che interagisce con un database PostgreSQL! Puoi espandere questo progetto aggiungendo più funzionalità,
-come l'inserimento di nuove boards, l'aggiornamento delle esistenti, e molto altro. Buon coding! 🚀
+`pg.Client` apre **una singola connessione** al database. È la scelta giusta per uno script che esegue query in sequenza. Nelle applicazioni web si usa invece `pg.Pool` che gestisce un pool di connessioni parallele — ma per ora `Client` è più semplice e chiaro.
+
+### Eseguire una query
+
+```javascript
+const result = await client.query("SELECT COUNT(*) AS totale FROM customers");
+console.log(result.rows[0].totale);
+```
+
+`client.query()` restituisce un oggetto con una proprietà `rows` — un array di oggetti JavaScript dove ogni oggetto è una riga del risultato. I nomi delle proprietà corrispondono agli alias definiti con `AS` nella query SQL.
+
+### Query con parametri
+
+Se dovessi filtrare per un valore specifico (es. un `customer_id`), non concatenare mai stringhe direttamente — usa i **parametri posizionali** `$1`, `$2`, ecc.:
+
+```javascript
+// ✅ Sicuro — usa parametri
+const res = await client.query(
+  "SELECT * FROM orders WHERE customer_id = $1 AND status = $2",
+  [42, "completed"]
+);
+
+// ❌ Mai fare così — vulnerabile a SQL injection
+const res = await client.query(
+  `SELECT * FROM orders WHERE customer_id = ${id}`
+);
+```
+
+I parametri vengono sanitizzati automaticamente da `pg`, proteggendo da attacchi **SQL injection**.
+
+### Il blocco try/finally
+
+```javascript
+try {
+  // esegui le query
+} catch (err) {
+  console.error(err.message);
+} finally {
+  await client.end(); // chiude sempre la connessione
+}
+```
+
+Il blocco `finally` garantisce che la connessione venga **sempre chiusa**, anche se si verifica un errore. Lasciare connessioni aperte è un problema comune nelle applicazioni Node.js — questo pattern lo previene.
+
+---
+
+## Provaci tu
+
+Prova ad aggiungere una nuova sezione al report. Ad esempio:
+
+- I **5 prodotti più venduti** per quantità
+- Il **tasso di cancellazione** per canale (`web`, `mobile`, `store`)
+- Il **valore medio dell'ordine** (AOV) per segmento cliente
+
+Le query le hai già scritte nella sezione precedente — si tratta solo di adattarle allo script! 🚀
