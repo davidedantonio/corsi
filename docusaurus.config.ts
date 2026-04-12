@@ -105,10 +105,10 @@ const config: Config = {
               label: "Introduzione ai Database",
               to: "/docs/category/introduzione-ai-database",
             },
-            {
-              label: "Data Analytics & Business Intelligence",
-              to: "docs/category/data-analytics--bi",
-            },
+            // {
+            //   label: "Data Analytics & Business Intelligence",
+            //   to: "docs/category/data-analytics--bi",
+            // },
             // {
             //   label: "Data Analytics & AI",
             //   to: "/docs/category/data-analytics-artificial-intelligence",

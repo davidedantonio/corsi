@@ -4,26 +4,26 @@ sidebar_position: 3
 
 # Effettuare query SQL di base
 
-Scoprirai che SQL ha una grande profondità. Ci sono persone il cui lavoro consiste principalmente nello scrivere SQL. Ma qui iniziamo con le basi. La prima cosa che voglio fare è inserire alcuni dati di esempio nel nostro database `users`.
+Scoprirai che SQL ha una grande profondità. Ci sono persone il cui lavoro consiste principalmente nello scrivere SQL. Ma qui iniziamo con le basi.
 
-[Fai clic qui][sql] per un set di tabelle di esempio per il tuo database. Questa query eliminerà tutte le tabelle esistenti e le ricreerà da zero. In qualsiasi momento puoi rilanciarla per avere una copia pulita delle tue tabelle. Puoi letteralmente copiare e incollare tutto nel tuo terminale connesso a PostgreSQL (`psql`) e funzionerà. Esiste un modo più elegante per caricarla dalla riga di comando, ma visto che siamo in Docker è più semplice copiare/incollare. Probabilmente impiegherà circa 90 secondi per eseguirsi.
+[Fai clic qui][sql] per ottenere il file SQL con tutte le tabelle e i dati di esempio del nostro e-commerce. Questa query eliminerà tutte le tabelle esistenti e le ricreerà da zero con circa **10.000 ordini** già inseriti. Puoi rilanciarla in qualsiasi momento per avere una copia pulita. Puoi copiare e incollare tutto nel terminale connesso a PostgreSQL (`psql`) e funzionerà.
 
 ## SELECT
 
-Iniziamo con **SELECT**. Serve per cercare dati in un database SQL. Ripetiamo l’istruzione SELECT della sezione precedente e analizziamola.
+Iniziamo con **SELECT**. Serve per cercare dati in un database SQL.
 
 ```sql
-SELECT * FROM users;
+SELECT * FROM customers;
 ```
 
-Questo recupera tutti i campi (il simbolo `*` è un _wildcard_) dalla tabella `users`. In questo esempio saranno 1000 utenti.
+Questo recupera tutti i campi (il simbolo `*` è un _wildcard_) dalla tabella `customers`. Vedrai tutti i clienti registrati nel database.
 
 ## LIMIT
 
-Selezioniamo meno utenti:
+Selezioniamo meno record:
 
 ```sql
-SELECT * FROM users LIMIT 10;
+SELECT * FROM customers LIMIT 10;
 ```
 
 Limita il risultato a 10 record.
@@ -33,7 +33,7 @@ Limita il risultato a 10 record.
 Selezioniamo solo alcune colonne, non tutte:
 
 ```sql
-SELECT username, user_id FROM users LIMIT 15;
+SELECT full_name, city, segment FROM customers LIMIT 15;
 ```
 
 In generale è una buona pratica selezionare solo le colonne di cui hai bisogno. Alcune tabelle possono avere anche 50+ colonne.
@@ -43,80 +43,108 @@ In generale è una buona pratica selezionare solo le colonne di cui hai bisogno.
 Filtriamo record specifici:
 
 ```sql
-SELECT username, email, user_id FROM users WHERE user_id=150;
-SELECT username, email, user_id FROM users WHERE last_login IS NULL LIMIT 10;
-```
+-- Un cliente specifico
+SELECT full_name, email, customer_id FROM customers WHERE customer_id = 10;
 
-La prima query restituisce l’utente con `user_id` uguale a 150.  
-La seconda restituisce 10 utenti che non hanno mai effettuato l’accesso (`last_login` è NULL).
+-- Solo i clienti VIP
+SELECT full_name, city, region FROM customers WHERE segment = 'vip';
+
+-- Prodotti che costano meno di 50 euro
+SELECT name, unit_price FROM products WHERE unit_price < 50;
+```
 
 ## AND e operazioni con date
 
-Supponiamo di voler vedere utenti che **non hanno mai effettuato login** e il cui account è stato creato **più di sei mesi fa**:
+Supponiamo di voler vedere gli ordini **completati** effettuati **nel 2024**:
 
 ```sql
-SELECT username, email, user_id, created_on
-FROM users
-WHERE last_login IS NULL AND created_on < NOW() - interval '6 months'
+SELECT order_id, customer_id, channel, created_on
+FROM orders
+WHERE status = 'completed' AND created_on >= '2024-01-01'
 LIMIT 10;
 ```
 
 - Usiamo `AND` per combinare più condizioni.
-- Facciamo anche un po’ di “date math”: `created_on` è un timestamp e lo confrontiamo con `NOW()` (ora attuale del server) meno un intervallo di sei mesi.
+- Confrontiamo `created_on` (un timestamp) con una data fissa.
+
+Possiamo anche usare intervalli dinamici con `NOW()`:
+
+```sql
+SELECT order_id, customer_id, created_on
+FROM orders
+WHERE status = 'pending' AND created_on < NOW() - interval '30 days'
+LIMIT 10;
+```
+
+Questa query trova gli ordini in stato `pending` da più di 30 giorni — utile per identificare ordini bloccati.
 
 ## ORDER BY
 
-Per trovare gli account più vecchi usiamo un ordinamento:
+Per trovare i prodotti più costosi:
 
 ```sql
-SELECT user_id, email, created_on FROM users ORDER BY created_on LIMIT 10;
+SELECT name, unit_price FROM products ORDER BY unit_price DESC LIMIT 10;
 ```
 
-Per i più recenti aggiungi `DESC` (il default è `ASC` — crescente):
+Per i meno costosi aggiungi `ASC` (che è anche il default):
 
 ```sql
-SELECT user_id, email, created_on FROM users ORDER BY created_on DESC LIMIT 10;
+SELECT name, unit_price FROM products ORDER BY unit_price ASC LIMIT 10;
 ```
 
 ## COUNT(\*)
 
-Vuoi sapere quanti record totali ci sono?
+Quanti clienti abbiamo in totale?
 
 ```sql
-SELECT COUNT(*) FROM users;
+SELECT COUNT(*) FROM customers;
 ```
 
-`*` conta tutte le righe.  
-Se invece vuoi contare solo gli utenti che hanno mai fatto login (ignorando i valori NULL):
+Quanti ordini sono stati completati?
 
 ```sql
-SELECT COUNT(last_login) FROM users;
+SELECT COUNT(*) FROM orders WHERE status = 'completed';
 ```
+
+Quanti clienti hanno specificato la propria città?
+
+```sql
+SELECT COUNT(city) FROM customers;
+```
+
+`COUNT(city)` conta solo le righe dove `city` non è `NULL`, a differenza di `COUNT(*)` che conta tutte le righe.
 
 ## UPDATE con RETURNING
 
-Se l’utente con `user_id = 1` fa login, aggiorniamo il campo `last_login`:
+Un cliente ha cambiato città — aggiorniamo il record:
 
 ```sql
-UPDATE users SET last_login = NOW() WHERE user_id = 1 RETURNING *;
-```
-
-Aggiorniamo nome e email dell’utente con `user_id = 2`:
-
-```sql
-UPDATE users SET full_name= 'Davide D''Antonio', email = 'lol@example.com' WHERE user_id = 2 RETURNING *;
+UPDATE customers
+SET city = 'Roma', region = 'Lazio'
+WHERE customer_id = 1
+RETURNING *;
 ```
 
 - Puoi aggiornare più campi separandoli con la virgola.
-- Usa sempre gli apici singoli `'` per le stringhe. I doppi `"` danno errore.
-- `RETURNING *` è opzionale ma utile per vedere i dati aggiornati subito.
+- `RETURNING *` è opzionale ma utile per vedere subito i dati aggiornati.
+
+Aggiorniamo lo status di un ordine:
+
+```sql
+UPDATE orders
+SET status = 'completed'
+WHERE order_id = 5
+RETURNING order_id, status;
+```
 
 ## DELETE
 
 Per cancellare un record:
 
 ```sql
-DELETE FROM users WHERE user_id = 1000;
+DELETE FROM customers WHERE customer_id = 500;
 ```
 
-[sql]: https://raw.githubusercontent.com/davidedantonio/corsi/refs/heads/main/sample-postgres.sql
+⚠️ Grazie al vincolo `ON DELETE SET NULL` che abbiamo definito, gli ordini di quel cliente non verranno cancellati — il loro `customer_id` sarà semplicemente impostato a `NULL`.
+
+[sql]: https://raw.githubusercontent.com/davidedantonio/intro-to-databases/refs/heads/main/postgres/sample-ecommerce.sql

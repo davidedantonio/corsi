@@ -10,47 +10,42 @@ Questo corso ha scelto erroneamente di usare il tipo di dato `JSON` quando avreb
 Tutto ciò che viene spiegato funzionerà comunque con entrambi, ma quando crei un tuo database dovresti quasi sempre (diciamo pure sempre) scegliere
 **JSONB**, perché memorizza i dati in un formato più ottimizzato e più adatto alle query, mentre `JSON` è di fatto un semplice campo di testo.
 
-Quindi sentiti libero di usare `JSONB` ovunque vedi scritto `JSON` oppure puoi continuare a usare `JSON` sapendo però che nei tuoi progetti reali userai `JSONB`.  
-In questo documento ho già corretto i riferimenti da JSON a JSONB, ma nei video sentirai ancora dire JSON.
+Quindi sentiti libero di usare `JSONB` ovunque vedi scritto `JSON` sapendo però che nei tuoi progetti reali userai `JSONB`.  
 
 [Per ulteriori informazioni leggi questo articolo sul blog][jsonb].
 
 ---
 
-## JSON
+## JSONB in un e-commerce
 
 A volte hai dati che non hanno uno schema ben definito.  
-Se provassi a inserirli in una tabella tradizionale di PostgreSQL, finiresti per avere nomi di campo molto generici da interpretare via codice, oppure dovresti creare molte tabelle diverse per rappresentare schemi differenti.
+Nel nostro e-commerce un caso classico sono le **specifiche tecniche dei prodotti**: un notebook ha RAM, CPU e schermo; una scarpa ha taglia e materiale; un alimento ha ingredienti e valori nutrizionali. Creare una colonna per ogni possibile attributo sarebbe impraticabile.
 
 Questa è una situazione in cui i database documentali come MongoDB funzionano molto bene: la loro natura **schemaless** è perfetta in questi casi.
 
-Tuttavia PostgreSQL ha una superpotenza qui: il tipo di dato **JSONB**.  
-Ti consente di inserire oggetti JSONB in una colonna e poi interrogarli tramite SQL.
+Tuttavia PostgreSQL ha una superpotenza: il tipo di dato **JSONB**.  
+Ti consente di inserire oggetti JSON in una colonna e poi interrogarli tramite SQL — il meglio di entrambi i mondi.
 
-Esempio: vogliamo aggiungere una funzione al nostro _message board_ che consenta agli utenti di inserire contenuti ricchi (poll, immagini, video).  
-In futuro potresti voler supportare anche tweet, documenti e altri tipi di embed che ancora non immaginiamo.  
-Con un normale schema relazionale diventerebbe complicato e poco flessibile; con **JSONB** invece possiamo farlo in modo semplice.
+Aggiungiamo una tabella per le specifiche tecniche dei prodotti:
 
 ```sql
-DROP TABLE IF EXISTS rich_content;
-
-CREATE TABLE rich_content (
-  content_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  comment_id INT REFERENCES comments(comment_id) ON DELETE CASCADE,
-  content JSONB NOT NULL
+CREATE TABLE product_specs (
+  spec_id    INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  product_id INT REFERENCES products(product_id) ON DELETE CASCADE,
+  specs      JSONB NOT NULL
 );
 
-INSERT INTO rich_content
-  (comment_id, content)
-VALUES
-  (63, '{ "type": "poll", "question": "What is your favorite color?", "options": ["blue", "red", "green", "yellow"] }'),
-  (358, '{ "type": "video", "url": "https://youtu.be/dQw4w9WgXcQ", "dimensions": { "height": 1080, "width": 1920 }}'),
-  (358, '{ "type": "poll", "question": "Is this your favorite video?", "options": ["yes", "no", "oh you"] }');
+INSERT INTO product_specs (product_id, specs) VALUES
+  (1,  '{ "display": "6.7 pollici AMOLED", "ram": "12GB", "storage": "256GB", "battery": "5000mAh" }'),
+  (2,  '{ "display": "15.6 pollici IPS", "ram": "16GB", "storage": "512GB SSD", "weight": "1.4kg", "os": "Windows 11" }'),
+  (3,  '{ "type": "over-ear", "anc": true, "battery": "30h", "bluetooth": "5.2" }'),
+  (15, '{ "capacity": "5L", "wattage": 1500, "programs": ["aria", "grill", "rotisserie"], "dishwasher_safe": true }'),
+  (17, '{ "type": "automatica", "bar": 15, "capacity": "1.8L", "compatible": ["espresso", "lungo", "cappuccino"] }');
 ```
 
-- Il tipo **JSONB** è la vera star: ci permette di salvare oggetti JSON interrogabili in seguito.
+- Il tipo **JSONB** ci permette di salvare strutture dati flessibili interrogabili in seguito.
 - PostgreSQL verifica che il JSON sia ben formato prima di inserirlo.
-- Puoi annidare quanto vuoi i dati, qualsiasi JSON valido è accettato.
+- Puoi annidare quanto vuoi i dati: qualsiasi JSON valido è accettato.
 
 ---
 
@@ -61,73 +56,67 @@ In SQL usiamo due operatori: `->` e `->>`.
 - `->` restituisce il valore come **JSON** (oggetto, array, stringa — sempre JSON).
 - `->>` restituisce il valore come **testo semplice**.
 
-### Trovare tutti i tipi di contenuto
+### Trovare tutti i tipi di schermo
 
 ```sql
-SELECT content -> 'type' FROM rich_content;
+SELECT product_id, specs -> 'display' AS display
+FROM product_specs
+WHERE specs -> 'display' IS NOT NULL;
 ```
 
-Esempio di risultato:
-
-```
-"poll"
-"video"
-"poll"
-"image"
-"image"
-```
-
-Per rimuovere i duplicati possiamo usare **SELECT DISTINCT**:
+### Filtrare prodotti con ANC attivo
 
 ```sql
-SELECT DISTINCT content -> 'type' FROM rich_content;
+SELECT product_id, specs ->> 'type' AS tipo
+FROM product_specs
+WHERE specs ->> 'anc' = 'true';
 ```
 
-❌ Questo darà errore: PostgreSQL non sa come confrontare tipi JSON.  
-Occorre forzare a testo:
+⚠️ Nota: usiamo `->>` per ottenere il valore come testo, così possiamo confrontarlo con la stringa `'true'`.
 
-```sql
-SELECT DISTINCT CAST(content -> 'type' AS TEXT) FROM rich_content;
-```
-
-Oppure molto più semplice, usare `->>`:
-
-```sql
-SELECT DISTINCT content ->> 'type' FROM rich_content;
-```
-
-### Filtrare solo i poll
-
-```sql
-SELECT content ->> 'type' AS content_type, comment_id
-FROM rich_content
-WHERE content ->> 'type' = 'poll';
-```
-
-⚠️ Nota: non puoi usare `content_type` nella clausola WHERE perché viene calcolata dopo.
-
-### Estrarre dati annidati (dimensioni)
+### Estrarre dati con JOIN al catalogo prodotti
 
 ```sql
 SELECT
-  content -> 'dimensions' ->> 'height' AS height,
-  content -> 'dimensions' ->> 'width' AS width,
-  comment_id
-FROM
-  rich_content;
+  p.name AS prodotto,
+  ps.specs ->> 'ram' AS ram,
+  ps.specs ->> 'storage' AS storage
+FROM product_specs ps
+INNER JOIN products p ON ps.product_id = p.product_id
+WHERE ps.specs ->> 'ram' IS NOT NULL;
 ```
 
-Per escludere i record senza dimensioni:
+### Interrogare array annidati
+
+Per verificare se un prodotto supporta una certa modalità (es. `espresso`), puoi usare l'operatore `@>` (contiene):
 
 ```sql
-SELECT
-  content -> 'dimensions' ->> 'height' AS height,
-  content -> 'dimensions' ->> 'width' AS width,
-  comment_id
-FROM
-  rich_content
-WHERE
-  content -> 'dimensions' IS NOT NULL;
+SELECT p.name
+FROM product_specs ps
+INNER JOIN products p ON ps.product_id = p.product_id
+WHERE ps.specs @> '{"compatible": ["espresso"]}';
 ```
+
+### SELECT DISTINCT sui valori JSON
+
+Per ottenere tutti i tipi di prodotto distinti:
+
+```sql
+SELECT DISTINCT content ->> 'type' FROM product_specs;
+```
+
+Se usi `->` invece di `->>` otterrai un errore perché PostgreSQL non sa confrontare tipi JSON grezzi — `->>` restituisce testo, che è confrontabile.
+
+---
+
+## Quando usare JSONB vs tabelle separate
+
+JSONB è potente, ma non è la soluzione a tutto. Usalo quando:
+
+- Gli attributi variano molto da prodotto a prodotto (come le specifiche tecniche).
+- Non hai bisogno di fare JOIN o aggregazioni su quei campi.
+- Lo schema è soggetto a cambiamenti frequenti.
+
+Se invece sai già che un campo verrà usato spesso nelle query (es. `status`, `price`, `category`), è meglio avere una colonna dedicata — è più veloce da interrogare e più facile da indicizzare.
 
 [jsonb]: https://www.citusdata.com/blog/2016/07/14/choosing-nosql-hstore-json-jsonb/
