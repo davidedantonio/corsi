@@ -4,8 +4,6 @@ Argomenti trattati durante le lezioni tenute per il percorso **IFTS Business Dat
 
 - Ecco un link al sito del corso: [https:/mcg-consulting2026.vercel.app/](https://mcg-consulting2026.vercel.app)
 
-- [LEZIONE 1 - Introduzione ai database SQL]()
-
 ## Step 1: Installare Node.js
 
 Installare Node.js è un processo abbastanza semplice e varia leggermente a seconda del sistema operativo che stai utilizzando. Ecco le istruzioni per i sistemi operativi più comuni:
@@ -139,7 +137,7 @@ Per scaricare questo progetto da GitHub in formato ZIP, segui questi semplici pa
 ### Passaggi Dettagliati con Immagini
 
 1. **Vai alla pagina del repository:**
-   - Ad esempio, se vuoi scaricare un repository specifico, il link potrebbe essere qualcosa come `https://github.com/davidedantonio/data-analytics`.
+   - Ad esempio, se vuoi scaricare un repository specifico, il link potrebbe essere qualcosa come `https://github.com/davidedantonio/corsi`.
 
 2. **Trova e clicca sul pulsante "Code":**
    ![Step 2](https://docs.github.com/assets/images/help/repository/code-button.png)
@@ -168,7 +166,7 @@ Installare le dipendenze di un progetto Node.js con Yarn è un processo semplice
 1. Apri il Terminale (su macOS o Linux) o il Prompt dei comandi (su Windows).
 2. Naviga nella directory del progetto:
    ```sh
-   cd /path/to/data-analytics
+   cd /path/to/corsi
    ```
 3. Esegui il comando per installare le dipendenze:
    ```sh
@@ -181,9 +179,11 @@ Ecco i passaggi per farlo:
 
 1. Apri il Terminale (su macOS o Linux) o il Prompt dei comandi (su Windows).
 2. Naviga nella directory del progetto:
+
    ```sh
-   cd /path/to/data-analytics
+   cd /path/to/corsi
    ```
+
 3. Esegui il comando per avviare il progetto in locale:
    ```sh
    yarn dev
