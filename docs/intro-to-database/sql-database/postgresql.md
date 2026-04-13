@@ -119,6 +119,38 @@ Vediamo cosa significa:
 
 📌 Ci sono molti altri tipi di dato in PostgreSQL: [vedi qui][types].
 
+```sql
+CREATE TABLE categories (
+  category_id   INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  name          VARCHAR(50) UNIQUE NOT NULL,
+  description   TEXT
+);
+
+CREATE TABLE products (
+  product_id    INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  category_id   INT REFERENCES categories(category_id) ON DELETE SET NULL,
+  name          VARCHAR(100) NOT NULL,
+  description   TEXT,
+  unit_price    NUMERIC(10, 2) NOT NULL CHECK (unit_price >= 0)
+);
+
+CREATE TABLE orders (
+  order_id      INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  customer_id   INT REFERENCES customers(customer_id) ON DELETE SET NULL,
+  status        VARCHAR(20) NOT NULL CHECK (status IN ('pending', 'completed', 'cancelled', 'refunded')),
+  channel       VARCHAR(20) CHECK (channel IN ('web', 'mobile', 'store')),
+  created_on    TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE order_items (
+  order_item_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  order_id      INT NOT NULL REFERENCES orders(order_id) ON DELETE CASCADE,
+  product_id    INT REFERENCES products(product_id) ON DELETE SET NULL,
+  quantity      INT NOT NULL CHECK (quantity > 0),
+  unit_price    NUMERIC(10, 2) NOT NULL CHECK (unit_price >= 0)
+);
+```
+
 ---
 
 ## Primo record
