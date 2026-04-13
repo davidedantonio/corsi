@@ -2,9 +2,9 @@
 
 Argomenti trattati durante le lezioni tenute per il percorso **IFTS Business Data Analyst**.
 
-- Ecco un link al sito del corso: [http://data-analytics-bi.finanza.tech/](http://data-analytics-bi.finanza.tech/)
+- Ecco un link al sito del corso: [https:/mcg-consulting2026.vercel.app/](https://mcg-consulting2026.vercel.app)
 
-- Download Slide in [formato PDF](https://github.com/davidedantonio/data-analytics/blob/main/BI%20-%20Data%20Analytics.pdf)
+- [LEZIONE 1 - Introduzione ai database SQL]()
 
 ## Step 1: Installare Node.js
 
