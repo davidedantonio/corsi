@@ -53,6 +53,109 @@ SELECT full_name, city, region FROM customers WHERE segment = 'vip';
 SELECT name, unit_price FROM products WHERE unit_price < 50;
 ```
 
+## Operatori di confronto
+
+Gli operatori di confronto sono il cuore delle clausole `WHERE` e `HAVING`: permettono di definire esattamente quali righe includere nei risultati.
+
+### Operatori standard
+
+| Operatore | Significato         | Esempio |
+|-----------|---------------------|---------|
+| `=`       | Uguale a            | `WHERE segment = 'vip'` |
+| `<>` o `!=` | Diverso da        | `WHERE status <> 'cancelled'` |
+| `<`       | Minore di           | `WHERE unit_price < 50` |
+| `>`       | Maggiore di         | `WHERE unit_price > 100` |
+| `<=`      | Minore o uguale a   | `WHERE unit_price <= 99` |
+| `>=`      | Maggiore o uguale a | `WHERE total >= 500` |
+
+`<>` è la notazione SQL standard, `!=` è un'alternativa accettata da PostgreSQL — funzionano in modo identico.
+
+### BETWEEN
+
+Verifica se un valore è compreso in un intervallo **inclusivo** (include gli estremi):
+
+```sql
+-- Prodotti tra 50€ e 200€
+SELECT name, unit_price FROM products
+WHERE unit_price BETWEEN 50 AND 200;
+
+-- Ordini del primo trimestre 2024
+SELECT order_id, created_on FROM orders
+WHERE created_on BETWEEN '2024-01-01' AND '2024-03-31';
+```
+
+Equivale a scrivere `>= 50 AND <= 200`, ma è più leggibile.
+
+### IN e NOT IN
+
+Controlla se un valore è presente in un elenco:
+
+```sql
+-- Ordini completati o rimborsati
+SELECT order_id, status FROM orders
+WHERE status IN ('completed', 'refunded');
+
+-- Clienti non retail
+SELECT full_name, segment FROM customers
+WHERE segment NOT IN ('retail');
+
+-- Clienti di alcune città specifiche
+SELECT full_name, city FROM customers
+WHERE city IN ('Milano', 'Roma', 'Torino', 'Firenze');
+```
+
+### LIKE e ILIKE
+
+Confronta stringhe con **pattern**. I caratteri speciali sono `%` (zero o più caratteri qualsiasi) e `_` (esattamente un carattere):
+
+```sql
+-- Clienti il cui nome inizia con "Mar"
+SELECT full_name FROM customers
+WHERE full_name LIKE 'Mar%';
+
+-- Prodotti che contengono "Pro" nel nome (case-sensitive)
+SELECT name FROM products
+WHERE name LIKE '%Pro%';
+
+-- Stessa query ma case-insensitive (ILIKE è specifico di PostgreSQL)
+SELECT name FROM products
+WHERE name ILIKE '%pro%';
+
+-- Email con dominio specifico
+SELECT full_name, email FROM customers
+WHERE email LIKE '%@example.com';
+```
+
+### IS NULL e IS NOT NULL
+
+I valori `NULL` non possono essere confrontati con `=` o `<>` — richiedono operatori dedicati:
+
+```sql
+-- Ordini senza cliente associato (cliente cancellato)
+SELECT order_id, created_on FROM orders
+WHERE customer_id IS NULL;
+
+-- Clienti che hanno specificato la città
+SELECT full_name, city FROM customers
+WHERE city IS NOT NULL;
+```
+
+⚠️ `WHERE city = NULL` non funziona mai in SQL — restituisce sempre zero righe. Usa sempre `IS NULL`.
+
+### IS DISTINCT FROM
+
+Operatore avanzato che tratta `NULL` come un valore confrontabile — utile per evitare i comportamenti inattesi dei `NULL` nei confronti normali:
+
+```sql
+-- Trova righe dove city è diversa da 'Milano', incluse quelle con city = NULL
+SELECT full_name, city FROM customers
+WHERE city IS DISTINCT FROM 'Milano';
+```
+
+Con un normale `<>`, le righe con `city = NULL` verrebbero escluse (perché `NULL <> 'Milano'` è `NULL`, non `TRUE`). Con `IS DISTINCT FROM` invece vengono incluse. È uno strumento di precisione, utile quando la presenza di `NULL` nei dati può distorcere i risultati.
+
+---
+
 ## AND e operazioni con date
 
 Supponiamo di voler vedere gli ordini **completati** effettuati **nel 2024**:
